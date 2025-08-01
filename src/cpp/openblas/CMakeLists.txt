@@ -12,6 +12,9 @@ add_executable(cpp_openblas_example dgemm_example.cpp)
 # Include project src directory for cblas_helper.h
 target_include_directories(cpp_openblas_example PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
+# Set compile definition to identify this as the OpenBLAS version
+target_compile_definitions(cpp_openblas_example PRIVATE HAVE_OPENBLAS)
+
 # Find BLAS package
 find_package(BLAS REQUIRED)
 

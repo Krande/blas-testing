@@ -35,23 +35,39 @@ pixi shell mklenv
 
 ## Build
 
-Build all examples:
+Build examples with MKL backend:
 
 ```bash
-pixi run configure
-pixi run build
+pixi run configure-mkl
+pixi run build-mkl
+```
+
+Build examples with OpenBLAS backend:
+
+```bash
+pixi run configure-openblas
+pixi run build-openblas
 ```
 
 ## Run
 
-Run specific examples:
+Run specific examples with MKL backend:
 
 ```bash
-pixi run run-cpp-dgemm
-pixi run run-fortran-dgemm
+pixi run run-cpp-mkl      # Run C++ example with MKL
+pixi run run-fortran-mkl  # Run Fortran example with MKL
+pixi run run-all-mkl      # Run all MKL examples
 ```
 
-Or run all examples at once:
+Run examples with OpenBLAS backend:
+
+```bash
+pixi run run-cpp-openblas      # Run C++ example with OpenBLAS
+pixi run run-fortran-openblas  # Run Fortran example with OpenBLAS
+pixi run run-all-openblas      # Run all OpenBLAS examples
+```
+
+Or run all examples with all backends at once:
 
 ```bash
 pixi run run-all
@@ -68,4 +84,29 @@ To add a new backend (e.g., OpenBLAS):
 ## Performance Comparison
 
 You can compare the performance of different BLAS backends by running the examples with different environment configurations and comparing the GFLOPS output.
-in this repo using pixi as the 
+
+Typical results might look like:
+
+```
+# MKL with C++ (direct implementation)
+DGEMM test: PASSED
+Performance: 0.49 GFLOPS
+Time: 4066 ms
+
+# MKL with Fortran (native BLAS call)
+DGEMM test: PASSED
+Performance: 2.80 GFLOPS
+Time: 714 ms
+
+# OpenBLAS with C++ (direct implementation)
+DGEMM test: PASSED
+Performance: 0.47 GFLOPS
+Time: 4102 ms
+
+# OpenBLAS with Fortran (native BLAS call)
+DGEMM test: PASSED
+Performance: 2.74 GFLOPS
+Time: 730 ms
+```
+
+Notice that Fortran implementation is typically much faster (5-6x) than the C++ version due to the way Fortran compilers optimize numeric operations and the direct binding to BLAS libraries.

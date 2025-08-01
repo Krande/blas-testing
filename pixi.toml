@@ -40,42 +40,92 @@ gfortran = "*"
 vs2022_win-64 = "*"
 fortran-compiler = "*"
 
+# Common task definitions for the top-level project
+[tasks]
+run-all = { depends-on = [] }
+
+# ===== MKL Environment ===== #
 [feature.mklenv.tasks]
-# Build tasks
-configure = "cmake -S . -B build-mkl -G Ninja"
-build = "cmake --build build-mkl"
-clean = "cmake -E remove_directory build-mkl"
+# Build tasks for MKL
+configure-mkl = "cmake -S . -B build-mkl -G Ninja"
+build-mkl = "cmake --build build-mkl"
+clean-mkl = "cmake -E remove_directory build-mkl"
 
-# Combined tasks
-build-and-run-cpp = { depends-on = ["configure", "build", "run-cpp-dgemm"] }
-build-and-run-fortran = { depends-on = ["configure", "build", "run-fortran-dgemm"] }
-run-mkl = { depends-on = ["build-and-run-cpp", "build-and-run-fortran"]}
-run-all = { depends-on = ["run-cpp-dgemm", "run-fortran-dgemm"] }
+# Platform-independent run tasks (will depend on platform-specific implementations)
+run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl"] }
+run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl"] }
+run-all-mkl = { depends-on = ["run-cpp-mkl", "run-fortran-mkl"] }
 
-# Run tasks for different platforms
+# Windows-specific MKL tasks
 [feature.mklenv.target.win-64.tasks]
-run-cpp-dgemm = "build-mkl/bin/cpp_dgemm_example.exe"
-run-fortran-dgemm = "build-mkl/bin/fortran_dgemm_example.exe"
-check-build = "dir build-mkl/bin"
+# Executables
+run-cpp-mkl-exe = "build-mkl/bin/cpp_dgemm_example.exe"
+run-fortran-mkl-exe = "build-mkl/bin/fortran_dgemm_example.exe"
+
+# Override the platform-independent tasks
+run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-cpp-mkl-exe"] }
+run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-fortran-mkl-exe"] }
+
+# Utilities
+check-build-mkl = "dir build-mkl/bin"
 show-env = "set | grep CONDA"
 
+# Linux-specific MKL tasks
 [feature.mklenv.target.linux-64.tasks]
-run-cpp-dgemm = "./build-mkl/bin/cpp_dgemm_example"
-run-fortran-dgemm = "./build-mkl/bin/fortran_dgemm_example"
-check-build = "ls -la ./build-mkl/bin"
+# Executables
+run-cpp-mkl-exe = "./build-mkl/bin/cpp_dgemm_example"
+run-fortran-mkl-exe = "./build-mkl/bin/fortran_dgemm_example"
 
-# Duplicate tasks for OpenBLAS environment
+# Override the platform-independent tasks
+run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-cpp-mkl-exe"] }
+run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-fortran-mkl-exe"] }
+
+# Utilities
+check-build-mkl = "ls -la ./build-mkl/bin"
+
+# ===== OpenBLAS Environment ===== #
 [feature.oblasenv.tasks]
-configure = "cmake -S . -B build-openblas -G Ninja"
-build = "cmake --build build-openblas"
-clean = "cmake -E remove_directory build-openblas"
-run-openblas = "build-openblas/bin/cpp_openblas_example"
-run-os = { depends-on = ["configure","build", "run-cpp-openblas", "build-and-run-fortran"]}
+# Build tasks for OpenBLAS
+configure-openblas = "cmake -S . -B build-openblas -G Ninja"
+build-openblas = "cmake --build build-openblas"
+clean-openblas = "cmake -E remove_directory build-openblas"
 
+# Platform-independent run tasks (will depend on platform-specific implementations)
+run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas"] }
+run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas"] }
+run-all-openblas = { depends-on = ["run-cpp-openblas", "run-fortran-openblas"] }
+
+# Windows-specific OpenBLAS tasks
 [feature.oblasenv.target.win-64.tasks]
-run-cpp-openblas = "build-openblas/bin/cpp_openblas_example.exe"
-check-build = "dir build-openblas/bin"
+# Executables
+run-cpp-openblas-exe = "build-openblas/bin/cpp_openblas_example.exe"
+run-fortran-openblas-exe = "build-openblas/bin/fortran_dgemm_example.exe"
 
+# Override the platform-independent tasks
+run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-cpp-openblas-exe"] }
+run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-fortran-openblas-exe"] }
+
+# Utilities
+check-build-openblas = "dir build-openblas/bin"
+
+# Linux-specific OpenBLAS tasks
 [feature.oblasenv.target.linux-64.tasks]
-run-cpp-openblas = "./build-openblas/bin/cpp_openblas_example"
-check-build = "ls -la ./build-openblas/bin"
+# Executables
+run-cpp-openblas-exe = "./build-openblas/bin/cpp_openblas_example"
+run-fortran-openblas-exe = "./build-openblas/bin/fortran_dgemm_example"
+
+# Override the platform-independent tasks
+run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-cpp-openblas-exe"] }
+run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-fortran-openblas-exe"] }
+
+# Utilities
+check-build-openblas = "ls -la ./build-openblas/bin"
+
+# ===== Universal run-all task ===== #
+# Windows version will run both MKL and OpenBLAS examples
+[target.win-64.tasks]
+run-all = { cmd = "cmd /C \"pixi run -e mklenv run-all-mkl && pixi run -e oblasenv run-all-openblas\"" }
+
+# Linux version will run both MKL and OpenBLAS examples
+[target.linux-64.tasks]
+run-all = { cmd = "bash -c 'pixi run -e mklenv run-all-mkl && pixi run -e oblasenv run-all-openblas'" }

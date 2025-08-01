@@ -37,8 +37,42 @@ endif()
 add_subdirectory(src/cpp/dgemm)
 add_subdirectory(src/fortran/dgemm)
 
-# Add OpenBLAS example if directory exists
+# Add OpenBLAS C++ example
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas)
+  add_subdirectory(src/cpp/openblas)
+else()
+  message(STATUS "Creating C++ OpenBLAS example directory")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas)
+  # Add the directory now that it exists
+  add_subdirectory(src/cpp/openblas)
+endif()
+
+# Add OpenBLAS Fortran example
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/fortran/openblas)
+  add_subdirectory(src/fortran/openblas)
+else()
+  message(STATUS "Creating Fortran OpenBLAS example directory")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/fortran/openblas)
+  # Add the directory now that it exists
+  add_subdirectory(src/fortran/openblas)
+  # Try to create the OpenBLAS example directory
+  message(STATUS "OpenBLAS example directory not found, creating one from dgemm example")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas)
+
+  # Copy C++ DGEMM example files to OpenBLAS directory
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/dgemm/dgemm_example.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas/dgemm_example.cpp
+    COPYONLY
+  )
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/dgemm/CMakeLists.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas/CMakeLists.txt
+    COPYONLY
+  )
+
+  # Now add the OpenBLAS directory
   add_subdirectory(src/cpp/openblas)
 endif()
 
