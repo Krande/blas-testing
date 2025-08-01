@@ -22,7 +22,18 @@ find_path(MKL_INCLUDE_DIR
   NAMES mkl.h
   HINTS ${MKL_ROOT_DIR}/include
         $ENV{CONDA_PREFIX}/include
+        $ENV{CONDA_PREFIX}/Library/include
   DOC "MKL include directory")
+
+if(NOT MKL_INCLUDE_DIR)
+  # If mkl.h not found, check for alternative mkl headers
+  find_path(MKL_INCLUDE_DIR
+    NAMES mkl_blas.h
+    HINTS ${MKL_ROOT_DIR}/include
+          $ENV{CONDA_PREFIX}/include
+          $ENV{CONDA_PREFIX}/Library/include
+    DOC "MKL include directory")
+endif()
 
 # Set library names based on platform
 if(WIN32)

@@ -7,6 +7,7 @@ platforms = ["win-64", "linux-64"]
 
 [environments]
 mklenv = {features = ["mklenv"], no-default-feature = true }
+oblasenv = {features = ["oblasenv"], no-default-feature = true }
 
 [feature.mklenv.dependencies]
 libblas = { version = "*", build = "*mkl" }
@@ -24,6 +25,21 @@ vs2022_win-64 = "*"
 #ifx_win-64 = "*"
 fortran-compiler = "*"
 
+[feature.oblasenv.dependencies]
+libblas = { version = "*", build = "*openblas" }
+liblapack = { version = "*", build = "*openblas" }
+openblas = "*"
+cmake = ">=3.20.0"
+ninja = "*"
+
+[feature.oblasenv.target.linux-64.dependencies]
+gcc = "*"
+gfortran = "*"
+
+[feature.oblasenv.target.win-64.dependencies]
+vs2022_win-64 = "*"
+fortran-compiler = "*"
+
 [feature.mklenv.tasks]
 # Build tasks
 configure = "cmake -S . -B build -G Ninja"
@@ -32,16 +48,31 @@ clean = "cmake -E remove_directory build"
 
 # Run tasks for different platforms
 [feature.mklenv.target.win-64.tasks]
-run-cpp-dgemm = "build/bin/dgemm_example.exe"
-run-fortran-dgemm = "build/bin/dgemm_example.exe"
+run-cpp-dgemm = "build/bin/cpp_dgemm_example.exe"
+run-fortran-dgemm = "build/bin/fortran_dgemm_example.exe"
 check-build = "dir build/bin"
 
 [feature.mklenv.target.linux-64.tasks]
-run-cpp-dgemm = "./build/bin/dgemm_example"
-run-fortran-dgemm = "./build/bin/dgemm_example"
+run-cpp-dgemm = "./build/bin/cpp_dgemm_example"
+run-fortran-dgemm = "./build/bin/fortran_dgemm_example"
 check-build = "ls -la ./build/bin"
 
 # Combined tasks
 build-and-run-cpp = { depends-on = ["build", "run-cpp-dgemm"] }
 build-and-run-fortran = { depends-on = ["build", "run-fortran-dgemm"] }
 run-all = { depends-on = ["run-cpp-dgemm", "run-fortran-dgemm"] }
+
+# Duplicate tasks for OpenBLAS environment
+[feature.oblasenv.tasks]
+configure = "cmake -S . -B build -G Ninja"
+build = "cmake --build build"
+clean = "cmake -E remove_directory build"
+run-openblas = "build/bin/cpp_openblas_example"
+
+[feature.oblasenv.target.win-64.tasks]
+run-cpp-openblas = "build/bin/cpp_openblas_example.exe"
+check-build = "dir build/bin"
+
+[feature.oblasenv.target.linux-64.tasks]
+run-cpp-openblas = "./build/bin/cpp_openblas_example"
+check-build = "ls -la ./build/bin"

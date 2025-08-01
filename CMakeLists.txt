@@ -23,9 +23,24 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+# Check for BLAS/LAPACK as fallback
+find_package(BLAS)
+find_package(LAPACK)
+if(BLAS_FOUND)
+  message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
+endif()
+if(LAPACK_FOUND)
+  message(STATUS "Found LAPACK: ${LAPACK_LIBRARIES}")
+endif()
+
 # Add subdirectories
 add_subdirectory(src/cpp/dgemm)
 add_subdirectory(src/fortran/dgemm)
+
+# Add OpenBLAS example if directory exists
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/openblas)
+  add_subdirectory(src/cpp/openblas)
+endif()
 
 # Print completion message
 message(STATUS "Configuration complete. Run 'cmake --build ${CMAKE_BINARY_DIR}' to build the project.")
