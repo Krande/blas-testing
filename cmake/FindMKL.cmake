@@ -17,6 +17,17 @@ if(NOT DEFINED MKL_ROOT_DIR)
   endif()
 endif()
 
+# Display debug info about MKL paths
+message(STATUS "MKL_ROOT_DIR: ${MKL_ROOT_DIR}")
+message(STATUS "CONDA_PREFIX: $ENV{CONDA_PREFIX}")
+
+# Check for typical MKL directories on Windows
+if(WIN32)
+  if(EXISTS "$ENV{CONDA_PREFIX}/Library/lib/mkl_core.lib")
+    message(STATUS "Found MKL in conda Library/lib directory")
+  endif()
+endif()
+
 # Find include directory
 find_path(MKL_INCLUDE_DIR
   NAMES mkl.h
@@ -37,7 +48,10 @@ endif()
 
 # Set library names based on platform
 if(WIN32)
-  set(_mkl_libs mkl_intel_lp64 mkl_intel_thread mkl_core libiomp5md)
+  # Try DLL versions first, then static versions
+  set(_mkl_libs 
+      mkl_intel_lp64_dll mkl_intel_thread_dll mkl_core_dll libiomp5md
+      mkl_intel_lp64 mkl_intel_thread mkl_core)
 else()
   set(_mkl_libs mkl_intel_lp64 mkl_intel_thread mkl_core iomp5 pthread m dl)
 endif()

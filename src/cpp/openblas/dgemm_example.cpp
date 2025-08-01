@@ -3,12 +3,8 @@
 #include <ctime>
 #include <cmath>
 
-// Use standard BLAS interface
-extern "C" {
-  void dgemm_(char* transa, char* transb, int* m, int* n, int* k,
-             double* alpha, double* a, int* lda, double* b, int* ldb,
-             double* beta, double* c, int* ldc);
-}
+// Include direct matrix multiplication implementation
+#include "../../direct_dgemm.h"
 
 // Simple timing function
 double get_time() {
@@ -37,9 +33,9 @@ int main() {
     // Measure performance
     double start_time = get_time();
 
-    // Call DGEMM: C = alpha*A*B + beta*C
-    dgemm_(&transa, &transb, &m, &n, &k, &alpha,
-           A.data(), &lda, B.data(), &ldb, &beta, C.data(), &ldc);
+    // Call DGEMM: C = alpha*A*B + beta*C using direct computation
+    std::cout << "Using direct matrix multiplication (OpenBLAS version)" << std::endl;
+    direct_dgemm(m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
 
     double end_time = get_time();
 

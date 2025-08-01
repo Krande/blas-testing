@@ -9,6 +9,9 @@ endif()
 # Add executable
 add_executable(cpp_openblas_example dgemm_example.cpp)
 
+# Include project src directory for cblas_helper.h
+target_include_directories(cpp_openblas_example PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
 # Find BLAS package
 find_package(BLAS REQUIRED)
 

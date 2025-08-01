@@ -46,21 +46,24 @@ configure = "cmake -S . -B build -G Ninja"
 build = "cmake --build build"
 clean = "cmake -E remove_directory build"
 
+# Combined tasks
+build-and-run-cpp = { depends-on = ["build", "run-cpp-dgemm"] }
+build-and-run-fortran = { depends-on = ["build", "run-fortran-dgemm"] }
+run-all = { depends-on = ["run-cpp-dgemm", "run-fortran-dgemm"] }
+
 # Run tasks for different platforms
 [feature.mklenv.target.win-64.tasks]
 run-cpp-dgemm = "build/bin/cpp_dgemm_example.exe"
 run-fortran-dgemm = "build/bin/fortran_dgemm_example.exe"
 check-build = "dir build/bin"
+show-env = "set | grep CONDA"
 
 [feature.mklenv.target.linux-64.tasks]
 run-cpp-dgemm = "./build/bin/cpp_dgemm_example"
 run-fortran-dgemm = "./build/bin/fortran_dgemm_example"
 check-build = "ls -la ./build/bin"
 
-# Combined tasks
-build-and-run-cpp = { depends-on = ["build", "run-cpp-dgemm"] }
-build-and-run-fortran = { depends-on = ["build", "run-fortran-dgemm"] }
-run-all = { depends-on = ["run-cpp-dgemm", "run-fortran-dgemm"] }
+
 
 # Duplicate tasks for OpenBLAS environment
 [feature.oblasenv.tasks]
