@@ -42,40 +42,40 @@ fortran-compiler = "*"
 
 [feature.mklenv.tasks]
 # Build tasks
-configure = "cmake -S . -B build -G Ninja"
-build = "cmake --build build"
-clean = "cmake -E remove_directory build"
+configure = "cmake -S . -B build-mkl -G Ninja"
+build = "cmake --build build-mkl"
+clean = "cmake -E remove_directory build-mkl"
 
 # Combined tasks
-build-and-run-cpp = { depends-on = ["build", "run-cpp-dgemm"] }
-build-and-run-fortran = { depends-on = ["build", "run-fortran-dgemm"] }
+build-and-run-cpp = { depends-on = ["configure", "build", "run-cpp-dgemm"] }
+build-and-run-fortran = { depends-on = ["configure", "build", "run-fortran-dgemm"] }
+run-mkl = { depends-on = ["build-and-run-cpp", "build-and-run-fortran"]}
 run-all = { depends-on = ["run-cpp-dgemm", "run-fortran-dgemm"] }
 
 # Run tasks for different platforms
 [feature.mklenv.target.win-64.tasks]
-run-cpp-dgemm = "build/bin/cpp_dgemm_example.exe"
-run-fortran-dgemm = "build/bin/fortran_dgemm_example.exe"
-check-build = "dir build/bin"
+run-cpp-dgemm = "build-mkl/bin/cpp_dgemm_example.exe"
+run-fortran-dgemm = "build-mkl/bin/fortran_dgemm_example.exe"
+check-build = "dir build-mkl/bin"
 show-env = "set | grep CONDA"
 
 [feature.mklenv.target.linux-64.tasks]
-run-cpp-dgemm = "./build/bin/cpp_dgemm_example"
-run-fortran-dgemm = "./build/bin/fortran_dgemm_example"
-check-build = "ls -la ./build/bin"
-
-
+run-cpp-dgemm = "./build-mkl/bin/cpp_dgemm_example"
+run-fortran-dgemm = "./build-mkl/bin/fortran_dgemm_example"
+check-build = "ls -la ./build-mkl/bin"
 
 # Duplicate tasks for OpenBLAS environment
 [feature.oblasenv.tasks]
-configure = "cmake -S . -B build -G Ninja"
-build = "cmake --build build"
-clean = "cmake -E remove_directory build"
-run-openblas = "build/bin/cpp_openblas_example"
+configure = "cmake -S . -B build-openblas -G Ninja"
+build = "cmake --build build-openblas"
+clean = "cmake -E remove_directory build-openblas"
+run-openblas = "build-openblas/bin/cpp_openblas_example"
+run-os = { depends-on = ["configure","build", "run-cpp-openblas", "build-and-run-fortran"]}
 
 [feature.oblasenv.target.win-64.tasks]
-run-cpp-openblas = "build/bin/cpp_openblas_example.exe"
-check-build = "dir build/bin"
+run-cpp-openblas = "build-openblas/bin/cpp_openblas_example.exe"
+check-build = "dir build-openblas/bin"
 
 [feature.oblasenv.target.linux-64.tasks]
-run-cpp-openblas = "./build/bin/cpp_openblas_example"
-check-build = "ls -la ./build/bin"
+run-cpp-openblas = "./build-openblas/bin/cpp_openblas_example"
+check-build = "ls -la ./build-openblas/bin"
