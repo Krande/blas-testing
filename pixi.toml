@@ -28,11 +28,18 @@ fortran-compiler = "*"
 # Build tasks
 configure = "cmake -S . -B build -G Ninja"
 build = "cmake --build build"
-clean = "rm -rf build"
+clean = "cmake -E remove_directory build"
 
-# Run tasks
-run-cpp-dgemm = "./build/src/cpp/dgemm/dgemm_example"
-run-fortran-dgemm = "./build/src/fortran/dgemm/dgemm_example"
+# Run tasks for different platforms
+[feature.mklenv.target.win-64.tasks]
+run-cpp-dgemm = "build/bin/dgemm_example.exe"
+run-fortran-dgemm = "build/bin/dgemm_example.exe"
+check-build = "dir build/bin"
+
+[feature.mklenv.target.linux-64.tasks]
+run-cpp-dgemm = "./build/bin/dgemm_example"
+run-fortran-dgemm = "./build/bin/dgemm_example"
+check-build = "ls -la ./build/bin"
 
 # Combined tasks
 build-and-run-cpp = { depends-on = ["build", "run-cpp-dgemm"] }

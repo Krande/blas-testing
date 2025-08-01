@@ -24,20 +24,42 @@ find_path(MKL_INCLUDE_DIR
         $ENV{CONDA_PREFIX}/include
   DOC "MKL include directory")
 
-# Libraries to search for
-set(_mkl_libs mkl_intel_lp64 mkl_intel_thread mkl_core iomp5 pthread m dl)
+# Set library names based on platform
+if(WIN32)
+  set(_mkl_libs mkl_intel_lp64 mkl_intel_thread mkl_core libiomp5md)
+else()
+  set(_mkl_libs mkl_intel_lp64 mkl_intel_thread mkl_core iomp5 pthread m dl)
+endif()
+
+# Additional search paths for Windows
+if(WIN32)
+  set(_mkl_libpaths
+      ${MKL_ROOT_DIR}/lib/intel64
+      ${MKL_ROOT_DIR}/lib
+      $ENV{CONDA_PREFIX}/Library/lib
+      $ENV{CONDA_PREFIX}/lib)
+else()
+  set(_mkl_libpaths
+      ${MKL_ROOT_DIR}/lib/intel64
+      ${MKL_ROOT_DIR}/lib
+      $ENV{CONDA_PREFIX}/lib)
+endif()
+
+# Debug output
+message(STATUS "Searching for MKL libraries in: ${_mkl_libpaths}")
 
 # MKL is composed of several libraries
 set(MKL_LIBRARIES "")
 foreach(_lib ${_mkl_libs})
   find_library(_found
     NAMES ${_lib}
-    HINTS ${MKL_ROOT_DIR}/lib
-          ${MKL_ROOT_DIR}/lib/intel64
-          $ENV{CONDA_PREFIX}/lib
+    HINTS ${_mkl_libpaths}
     DOC "MKL ${_lib} library")
   if(_found)
     list(APPEND MKL_LIBRARIES ${_found})
+    message(STATUS "Found MKL component: ${_found}")
+  else()
+    message(STATUS "Could not find MKL component: ${_lib}")
   endif()
   unset(_found CACHE)
 endforeach()

@@ -1,14 +1,24 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
-#include <mkl.h>
+#include <cmath>
 
-extern "C" {
-    // DGEMM prototype
+#ifdef HAVE_MKL
+  #include <mkl.h>
+#else
+  // Use standard BLAS interface
+  extern "C" {
     void dgemm_(char* transa, char* transb, int* m, int* n, int* k,
                double* alpha, double* a, int* lda, double* b, int* ldb,
                double* beta, double* c, int* ldc);
-}
+  }
+
+  // Replacement for MKL's dsecnd function
+  double dsecnd() {
+    static clock_t start = clock();
+    return static_cast<double>(clock() - start) / CLOCKS_PER_SEC;
+  }
+#endif
 
 int main() {
     // Matrix dimensions
