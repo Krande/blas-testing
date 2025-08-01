@@ -54,17 +54,20 @@ clean-mkl = "cmake -E remove_directory build-mkl"
 # Platform-independent run tasks (will depend on platform-specific implementations)
 run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl"] }
 run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl"] }
-run-all-mkl = { depends-on = ["run-cpp-mkl", "run-fortran-mkl"] }
+run-mixed-mkl = { depends-on = ["configure-mkl", "build-mkl"] }
+run-all-mkl = { depends-on = ["run-cpp-mkl", "run-fortran-mkl", "run-mixed-mkl"] }
 
 # Windows-specific MKL tasks
 [feature.mklenv.target.win-64.tasks]
 # Executables
 run-cpp-mkl-exe = "build-mkl/bin/cpp_dgemm_example.exe"
 run-fortran-mkl-exe = "build-mkl/bin/fortran_dgemm_example.exe"
+run-mixed-mkl-exe = "build-mkl/bin/mixed_dgemm_example.exe"
 
 # Override the platform-independent tasks
 run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-cpp-mkl-exe"] }
 run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-fortran-mkl-exe"] }
+run-mixed-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-mixed-mkl-exe"] }
 
 # Utilities
 check-build-mkl = "dir build-mkl/bin"
@@ -75,10 +78,12 @@ show-env = "set | grep CONDA"
 # Executables
 run-cpp-mkl-exe = "./build-mkl/bin/cpp_dgemm_example"
 run-fortran-mkl-exe = "./build-mkl/bin/fortran_dgemm_example"
+run-mixed-mkl-exe = "./build-mkl/bin/mixed_dgemm_example"
 
 # Override the platform-independent tasks
 run-cpp-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-cpp-mkl-exe"] }
 run-fortran-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-fortran-mkl-exe"] }
+run-mixed-mkl = { depends-on = ["configure-mkl", "build-mkl", "run-mixed-mkl-exe"] }
 
 # Utilities
 check-build-mkl = "ls -la ./build-mkl/bin"
@@ -93,17 +98,20 @@ clean-openblas = "cmake -E remove_directory build-openblas"
 # Platform-independent run tasks (will depend on platform-specific implementations)
 run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas"] }
 run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas"] }
-run-all-openblas = { depends-on = ["run-cpp-openblas", "run-fortran-openblas"] }
+run-mixed-openblas = { depends-on = ["configure-openblas", "build-openblas"] }
+run-all-openblas = { depends-on = ["run-cpp-openblas", "run-fortran-openblas", "run-mixed-openblas"] }
 
 # Windows-specific OpenBLAS tasks
 [feature.oblasenv.target.win-64.tasks]
 # Executables
 run-cpp-openblas-exe = "build-openblas/bin/cpp_openblas_example.exe"
 run-fortran-openblas-exe = "build-openblas/bin/fortran_dgemm_example.exe"
+run-mixed-openblas-exe = "build-openblas/bin/mixed_dgemm_example.exe"
 
 # Override the platform-independent tasks
 run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-cpp-openblas-exe"] }
 run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-fortran-openblas-exe"] }
+run-mixed-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-mixed-openblas-exe"] }
 
 # Utilities
 check-build-openblas = "dir build-openblas/bin"
@@ -113,10 +121,12 @@ check-build-openblas = "dir build-openblas/bin"
 # Executables
 run-cpp-openblas-exe = "./build-openblas/bin/cpp_openblas_example"
 run-fortran-openblas-exe = "./build-openblas/bin/fortran_dgemm_example"
+run-mixed-openblas-exe = "./build-openblas/bin/mixed_dgemm_example"
 
 # Override the platform-independent tasks
 run-cpp-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-cpp-openblas-exe"] }
 run-fortran-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-fortran-openblas-exe"] }
+run-mixed-openblas = { depends-on = ["configure-openblas", "build-openblas", "run-mixed-openblas-exe"] }
 
 # Utilities
 check-build-openblas = "ls -la ./build-openblas/bin"

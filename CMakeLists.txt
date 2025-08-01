@@ -33,6 +33,16 @@ if(LAPACK_FOUND)
   message(STATUS "Found LAPACK: ${LAPACK_LIBRARIES}")
 endif()
 
+# Add Mixed C++/Fortran example
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/mixed)
+  add_subdirectory(src/mixed)
+else()
+  message(STATUS "Creating Mixed C++/Fortran example directory")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/mixed)
+  # Add the directory now that it exists
+  add_subdirectory(src/mixed)
+endif()
+
 # Add subdirectories
 add_subdirectory(src/cpp/dgemm)
 add_subdirectory(src/fortran/dgemm)
