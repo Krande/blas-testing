@@ -7,7 +7,10 @@ This project demonstrates how to use BLAS libraries with different backends (MKL
 
 - pixi package manager
 - CMake 3.10+
-- C++ and Fortran compilers
+- C++ compiler (tested with MSVC 19.43 on Windows)
+- Fortran compiler (tested with LLVMFlang 19.1.7 on Windows)
+
+The project is configured to work with different compilers and platforms through the pixi environment system.
 
 ## Structure
 
@@ -92,43 +95,66 @@ To add a new backend (e.g., OpenBLAS):
 
 You can compare the performance of different BLAS backends by running the examples with different environment configurations and comparing the GFLOPS output.
 
-Typical results might look like:
+### Latest Results (Windows 10, MSVC 19.43 / LLVMFlang 19.1.7)
 
 ```
 # MKL with C++ (direct implementation)
 DGEMM test: PASSED
-Performance: 0.49 GFLOPS
-Time: 4066 ms
+Performance: 0.486855 GFLOPS
+Time: 4108 ms
 
 # MKL with Fortran (native BLAS call)
 DGEMM test: PASSED
-Performance: 2.80 GFLOPS
-Time: 714 ms
+Performance: 31.25 GFLOPS
+Time: 64 ms
 
 # OpenBLAS with C++ (direct implementation)
 DGEMM test: PASSED
-Performance: 0.47 GFLOPS
-Time: 4102 ms
+Performance: 0.492005 GFLOPS
+Time: 4065 ms
 
 # OpenBLAS with Fortran (native BLAS call)
 DGEMM test: PASSED
-Performance: 2.74 GFLOPS
-Time: 730 ms
+Performance: 400.0 GFLOPS
+Time: 5 ms
 
 # Mixed C++/Fortran with MKL
 Fortran DGEMM:
   Result test: PASSED
-  Performance: 2.78 GFLOPS
-  Time: 719 ms
+  Performance: 142.857143 GFLOPS
+  Time: 14.000000 ms
 
 C++ DGEMM:
   Result test: PASSED
-  Performance: 0.48 GFLOPS
-  Time: 4080 ms
+  Performance: 3.389831 GFLOPS
+  Time: 590.000000 ms
 
 Results comparison:
   Fortran and C++ results match: YES
-  Speedup (Fortran vs C++): 5.67x
+  Speedup (Fortran vs C++): 42.142857x
+
+# Mixed C++/Fortran with OpenBLAS
+Fortran DGEMM:
+  Result test: PASSED
+  Performance: 666.666667 GFLOPS
+  Time: 3.000000 ms
+
+C++ DGEMM:
+  Result test: PASSED
+  Performance: 3.454231 GFLOPS
+  Time: 579.000000 ms
+
+Results comparison:
+  Fortran and C++ results match: YES
+  Speedup (Fortran vs C++): 193.000000x
 ```
 
-Notice that Fortran implementation is typically much faster (5-6x) than the C++ version due to the way Fortran compilers optimize numeric operations and the direct binding to BLAS libraries.
+### Analysis
+
+1. **Native BLAS vs Direct Implementation**: The results show a dramatic difference between using the native BLAS libraries through Fortran and our direct C++ implementation. The optimized BLAS routines are 42-193x faster.
+
+2. **MKL vs OpenBLAS**: In these tests, OpenBLAS showed better performance than MKL for this specific DGEMM operation. The OpenBLAS Fortran implementation achieved up to 666 GFLOPS compared to MKL's 143 GFLOPS.
+
+3. **Consistent C++ Performance**: Our direct C++ implementation performance is consistent regardless of the backend environment (~3.4 GFLOPS), as it doesn't actually use the backend libraries.
+
+4. **Compiler Impact**: These results were obtained using Microsoft Visual C++ (MSVC 19.43) for C++ and LLVM Flang 19.1.7 for Fortran on Windows 10. Different compilers and platforms may yield different performance characteristics.

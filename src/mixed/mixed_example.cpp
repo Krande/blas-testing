@@ -63,19 +63,36 @@ int main() {
     double cpp_end_time = get_time();
     double cpp_time = cpp_end_time - cpp_start_time;
 
+    // Debug: Check first few elements of C_cpp
+    std::cout << "\nFirst few elements of C_cpp:" << std::endl;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            std::cout << C_cpp[i + j*ldc] << " ";
+        }
+        std::cout << std::endl;
+    }
+
     // ===== Verify results =====
     double expected = k * alpha * 1.0 * 2.0;
     bool fortran_correct = true;
     bool cpp_correct = true;
 
-    for (int i = 0; i < 10; ++i) {
-        if (std::abs(C_fortran[i] - expected) > 1e-6) {
-            fortran_correct = false;
-            break;
-        }
-        if (std::abs(C_cpp[i] - expected) > 1e-6) {
-            cpp_correct = false;
-            break;
+    std::cout << "\nExpected value: " << expected << std::endl;
+
+    // Check the first few elements of each result matrix
+    for (int j = 0; j < 3; ++j) {
+        for (int i = 0; i < 3; ++i) {
+            int idx = i + j*ldc;
+            // Check Fortran result
+            if (std::abs(C_fortran[idx] - expected) > 1e-6) {
+                fortran_correct = false;
+                std::cout << "Fortran value at (" << i << "," << j << ") = " << C_fortran[idx] << " differs from expected " << expected << std::endl;
+            }
+            // Check C++ result
+            if (std::abs(C_cpp[idx] - expected) > 1e-6) {
+                cpp_correct = false;
+                std::cout << "C++ value at (" << i << "," << j << ") = " << C_cpp[idx] << " differs from expected " << expected << std::endl;
+            }
         }
     }
 
