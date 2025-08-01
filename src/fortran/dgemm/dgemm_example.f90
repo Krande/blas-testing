@@ -58,9 +58,12 @@ program dgemm_example
     gflops = (2.0_dp * m * n * k) / ((end_time - start_time) * 1.0e9_dp)
 
     ! Print results
+    print *, '\nFortran DGEMM Example Results:'
+    print *, '----------------------------'
     print *, 'DGEMM test: ', merge('PASSED', 'FAILED', correct)
     print *, 'Performance: ', gflops, ' GFLOPS'
     print *, 'Time: ', (end_time - start_time) * 1000.0_dp, ' ms'
+    print *, '----------------------------'
 
     ! Free memory
     deallocate(a, b, c)

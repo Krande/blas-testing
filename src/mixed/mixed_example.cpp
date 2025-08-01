@@ -7,12 +7,15 @@
 // Include direct matrix multiplication implementation
 #include "../direct_dgemm.h"
 
+// Ensure cout flushes immediately
+#define FLUSH std::cout.flush()
+
 // Declare the Fortran function
 extern "C" {
     void fortran_dgemm_wrapper_func(int m, int n, int k, double alpha, 
                                   const double* a, int lda, 
                                   const double* b, int ldb,
-                                  double* c, int ldc,
+                                  double beta, double* c, int ldc,
                                   double* elapsed_time);
 }
 
@@ -23,8 +26,12 @@ double get_time() {
 }
 
 int main() {
+    // Disable buffering on cout
+    std::cout.setf(std::ios::unitbuf);
+
     std::cout << "Mixed C++/Fortran DGEMM Example" << std::endl;
     std::cout << "--------------------------------" << std::endl;
+    FLUSH;
 
     // Matrix dimensions
     int m = 1000, n = 1000, k = 1000;
@@ -45,7 +52,7 @@ int main() {
 
     // Call the Fortran wrapper function
     fortran_dgemm_wrapper_func(m, n, k, alpha, A.data(), lda, B.data(), ldb, 
-                             C_fortran.data(), ldc, &fortran_time);
+                             beta, C_fortran.data(), ldc, &fortran_time);
 
     // ===== Run C++ DGEMM =====
     double cpp_start_time = get_time();
@@ -83,23 +90,32 @@ int main() {
 
     // ===== Print results =====
     std::cout << std::fixed << std::setprecision(6);
+    std::cout << "\n\nReady to display results..." << std::endl;
+    FLUSH;
 
     // Fortran results
     std::cout << "\nFortran DGEMM:" << std::endl;
+    FLUSH;
     std::cout << "  Result test: " << (fortran_correct ? "PASSED" : "FAILED") << std::endl;
     std::cout << "  Performance: " << (2.0 * m * n * k) / (fortran_time * 1e9) << " GFLOPS" << std::endl;
     std::cout << "  Time: " << fortran_time * 1000.0 << " ms" << std::endl;
+    FLUSH;
 
     // C++ results
     std::cout << "\nC++ DGEMM:" << std::endl;
     std::cout << "  Result test: " << (cpp_correct ? "PASSED" : "FAILED") << std::endl;
     std::cout << "  Performance: " << (2.0 * m * n * k) / (cpp_time * 1e9) << " GFLOPS" << std::endl;
     std::cout << "  Time: " << cpp_time * 1000.0 << " ms" << std::endl;
+    FLUSH;
 
     // Comparison
     std::cout << "\nResults comparison:" << std::endl;
     std::cout << "  Fortran and C++ results match: " << (results_match ? "YES" : "NO") << std::endl;
     std::cout << "  Speedup (Fortran vs C++): " << (cpp_time / fortran_time) << "x" << std::endl;
+    FLUSH;
+
+    std::cout << "\nMixed C++/Fortran DGEMM Example completed successfully." << std::endl;
+    FLUSH;
 
     return 0;
 }

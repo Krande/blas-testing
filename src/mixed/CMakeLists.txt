@@ -73,13 +73,34 @@ endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(mixed_dgemm_example PRIVATE -O3)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-  target_compile_options(mixed_dgemm_example PRIVATE /O2)
+  # For MSVC, explicitly set the optimization flag but remove debug incompatible flags
+  target_compile_options(mixed_dgemm_example PRIVATE 
+    /O2     # Optimize for speed
+    /MD     # Use multithreaded DLL runtime
+    /Oy-    # Frame pointer emission
+    /Oi     # Enable intrinsic functions
+    /Gy     # Function-level linking
+    /MP     # Multi-processor compilation
+  )
+  # Disable the runtime checks which conflict with optimization
+  string(REGEX REPLACE "/RTC[1csu]+" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   target_compile_options(fortran_dgemm_wrapper PRIVATE -O3)
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   target_compile_options(fortran_dgemm_wrapper PRIVATE -O3)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Flang|LLVMFlang")
+  # Add specific flags for Flang compiler - use debug flags in debug build
+  if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_options(fortran_dgemm_wrapper PRIVATE -g)
+  else()
+    target_compile_options(fortran_dgemm_wrapper PRIVATE -O3)
+  endif()
+  # Fix for Windows flang compiler
+  if(WIN32)
+    target_compile_options(fortran_dgemm_wrapper PRIVATE -fms-runtime-lib=dll)
+  endif()
 endif()
 
 # Output executable path information
